@@ -6,6 +6,11 @@
 #include <QThread>
 #include <QTcpSocket>
 #include <QDebug>
+#include <QTime>
+
+
+
+
 
 class MyThread : public QThread
 {

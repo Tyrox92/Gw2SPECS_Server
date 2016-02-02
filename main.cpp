@@ -3,6 +3,7 @@
 #include <QApplication>
 #include "myserver.h"
 
+QTime timeOut1;
 
 int main(int argc, char *argv[])
 {

@@ -2,12 +2,16 @@
 #include <iostream>
 #include <string>
 #include "mythread.h"
+#include "myserver.h"
 #include <QtNetwork>
+
+
 
 QByteArray ClientsData[10];
 int ClientsIDs[10];
 int NumberOfClients;
-
+int ClientsMask[10];
+long ClientTimeOut[10];
 
 
 MyThread::MyThread(qintptr ID, QObject *parent) :
@@ -19,15 +23,12 @@ MyThread::MyThread(qintptr ID, QObject *parent) :
 
 void MyThread::run()
 {
-    // thread starts here
-    //qDebug() << " Thread started";
 
     socket = new QTcpSocket();
 
-    // set the ID
+
     if(!socket->setSocketDescriptor(this->socketDescriptor))
     {
-        // something's wrong, we just emit a signal
         emit error(socket->error());
         return;
     }
@@ -37,23 +38,33 @@ void MyThread::run()
     //        This makes the slot to be invoked immediately, when the signal is emitted.
 
 
-    int i;
+    int i,j;
     i=0;
-    if (NumberOfClients<=10)  //max 10 clients for raid
+    j=10;
+    for (i=0;i<10;i++)
+     {
+        if ((ClientsIDs[i]==1) && (timeOut1.elapsed()-ClientTimeOut[i]>6000))
+            {
+             qDebug() << "Cleaning timeouted Client" <<i;
+             ClientsIDs[i]=0;NumberOfClients--;
+             if (i<j) j=i;
+            }
+     }
+
+    if (NumberOfClients<10)
     {
+     i=0;
      while ((i<10) && (ClientsIDs[i]!=0)) i++;
      ClientsIDs[i]=socketDescriptor;
-     //semi-handshake
      socket->write("***");
      socket->write(QByteArray::number(i));
      NumberOfClients++;
-     qDebug() << "Client" << i+1 << "(" << socket->peerAddress().toString() << "-" << socketDescriptor << ") connected";
-     qDebug() << NumberOfClients << " clients connected";
+     qDebug() << "Client" << i << " (" << socket->peerAddress().toString() << "-" << socketDescriptor << ") connected";
+     qDebug() << NumberOfClients << " client(s) connected";
      connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
      connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
 
      // We'll have multiple clients, we want to know which is which
-     //qDebug() << socketDescriptor << " Client connected";
 
      // make this thread a loop,
      // thread will stay alive so that signal/slot to function properly
@@ -61,44 +72,70 @@ void MyThread::run()
 
      exec();
     }
-    //exit thread if more then 10 clients
+    else
+        {
+           qDebug() << "Server is full: 10/10 clients connected";exit(0);
+        }
 }
 
 void MyThread::readyRead()
 {
     // get the information
 
+
     QByteArray Data = socket->readAll();
-    int i;
-    i=0;
+    int i,j;
+    i=0;j=0;
     while ((i<10) && (ClientsIDs[i]!=socketDescriptor)) i++;
     if (i<10)
     {
+        j=i;
         ClientsData[i]=Data;
     }
+    else {qDebug() << "Incoming data error : NO MATCHING CLIENT ID";}
+
     for(i=0;i<10;i++)
     {
-    if (ClientsIDs[i]>10)  socket->write(ClientsData[i]);
-    if ((ClientsIDs[i]<10) && (ClientsIDs[i]>0))
+    if (ClientsIDs[i]>1) {socket->write(ClientsData[i]);}
+    if (ClientsIDs[i]==1)
         {
+        if (timeOut1.elapsed()-ClientTimeOut[i]>3000)
+        {
+            ClientsIDs[i]=0;NumberOfClients--;
+            qDebug() << "Client"<<i<< " timeout reached, fully disconnected";
+            qDebug() << NumberOfClients << " client(s) connected";
+        }
+        else
+         {
         sprintf(tmp1, "*%u1#Disconnected*%u2#0*%u3#0*%u4#0*", i,i,i,i);
         socket->write(tmp1);
-        ClientsIDs[i]--;
+        ClientsMask[i]&=  (~ (1<<j));
+        if (ClientsMask[i]==0)
+            {
+            ClientsIDs[i]=0;
+            NumberOfClients--;
+            qDebug() << "Client"<<i<< " disconnection mask reached zero, fully disconnected";
+            qDebug() << NumberOfClients << " client(s) connected";
+            }
         }
-    if (ClientsIDs[i]<0) ClientsIDs[i]=0; //its free again
+        }
     }
 
 }
 
 void MyThread::disconnected()
 {
-    int i;
+    int i,j;
     i=0;
     while ((i<10) && (ClientsIDs[i]!=socketDescriptor)) i++;
-    qDebug() << "Client" << i+1 << "(" << socket->peerAddress().toString() << "-" << socketDescriptor << ") disconnected";
-    NumberOfClients--;
-    qDebug() << NumberOfClients << " clients connected";
-    ClientsIDs[i]=NumberOfClients; //disconnected not free yet
+    qDebug() << "Client" << i << " (" << socket->peerAddress().toString() << "-" << socketDescriptor << ") disconnected, not free yet";
+    ClientsIDs[i]=1; //disconnected not free yet
+    ClientsMask[i]=0;
+    for (j=0;j<10;j++)
+        {
+         if (ClientsIDs[j]>1) ClientsMask[i]|=(1<<j);
+        }
+    ClientTimeOut[i]=timeOut1.elapsed();
     socket->deleteLater();
     exit(0);
 }

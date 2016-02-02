@@ -4,7 +4,10 @@
 #define MYSERVER_H
 
 #include <QTcpServer>
+#include <QTime>
 #include "mythread.h"
+
+extern QTime timeOut1;
 
 class MyServer : public QTcpServer
 {
