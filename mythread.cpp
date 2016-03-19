@@ -12,6 +12,7 @@ int ClientsIDs[10];
 int NumberOfClients;
 int ClientsMask[10];
 long ClientTimeOut[10];
+long ClientLastTime[10];
 
 
 MyThread::MyThread(qintptr ID, QObject *parent) :
@@ -56,6 +57,7 @@ void MyThread::run()
      i=0;
      while ((i<10) && (ClientsIDs[i]!=0)) i++;
      ClientsIDs[i]=socketDescriptor;
+     ClientLastTime[i]=timeOut1.elapsed();
      socket->write("***");
      socket->write(QByteArray::number(i));
      NumberOfClients++;
@@ -84,18 +86,30 @@ void MyThread::readyRead()
 
 
     QByteArray Data = socket->readAll();
-    int i,j;
+    int i,j,k;
     i=0;j=0;
     while ((i<10) && (ClientsIDs[i]!=socketDescriptor)) i++;
     if (i<10)
     {
         j=i;
         ClientsData[i]=Data;
+        ClientLastTime[i]=timeOut1.elapsed();
     }
     else {qDebug() << "Incoming data error : NO MATCHING CLIENT ID";}
 
     for(i=0;i<10;i++)
     {
+    if ((ClientsIDs[i]>1) &&  (timeOut1.elapsed()-ClientLastTime[i]>5000))
+        {
+        qDebug() << "Client"<<i<< " connection lost, disconnecting..";
+        ClientsIDs[i]=1; //disconnected not free yet
+        ClientsMask[i]=0;
+        for (k=0;k<10;k++)
+            {
+             if (ClientsIDs[k]>1) ClientsMask[i]|=(1<<k);
+            }
+        ClientTimeOut[i]=timeOut1.elapsed();
+        }
     if (ClientsIDs[i]>1) {socket->write(ClientsData[i]);}
     if (ClientsIDs[i]==1)
         {
@@ -128,6 +142,8 @@ void MyThread::disconnected()
     int i,j;
     i=0;
     while ((i<10) && (ClientsIDs[i]!=socketDescriptor)) i++;
+    if (i<10)
+    {
     qDebug() << "Client" << i << " (" << socket->peerAddress().toString() << "-" << socketDescriptor << ") disconnected, not free yet";
     ClientsIDs[i]=1; //disconnected not free yet
     ClientsMask[i]=0;
@@ -138,4 +154,5 @@ void MyThread::disconnected()
     ClientTimeOut[i]=timeOut1.elapsed();
     socket->deleteLater();
     exit(0);
+    }
 }

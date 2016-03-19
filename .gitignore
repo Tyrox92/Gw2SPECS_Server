@@ -46,5 +46,14 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# QT
+#qt
+dps_server.pro.user
+dps_server.pro.user.*
 *.pro.user
+*.pro.user.*
+*.user
+*.user.*
+*.qbs.user
+*.qbs.user.*
+*.qmlproject.user
+*.qmlproject.user.*
