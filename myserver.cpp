@@ -16,7 +16,7 @@ void MyServer::startServer()
 {
     int port = 0;
     timeOut1.start();
-    std::cout << "GW2DPS Server V1.0 Made by Tyrox and Kozzy\n";
+    std::cout << "GW2DPS Server V1.1 Made by Tyrox and Kozzy\n";
     std::cout << "Port : (default=1234) ";
     std::cin >> port;
     if (port==0) port=1234;
