@@ -121,8 +121,8 @@ void MyThread::readyRead()
         }
         else
          {
-        sprintf(tmp1, "|%u;;0;0;0;0;0|", i);
-        socket->write(tmp1);
+        //sprintf(tmp1, "|%u;;0;0;0;0;0|", i);
+        //socket->write(tmp1);
         ClientsMask[i]&=  (~ (1<<j));
         if (ClientsMask[i]==0)
             {
