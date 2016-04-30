@@ -121,8 +121,7 @@ void MyThread::readyRead()
         }
         else
          {
-        //sprintf(tmp1, "*%u1#Disconnected*%u2#0*%u3#0*%u4#0*", i,i,i,i);
-        sprintf(tmp1, "|%u;Disconnected;0;0;0;0;0|", i);
+        sprintf(tmp1, "|%u;;0;0;0;0;0|", i);
         socket->write(tmp1);
         ClientsMask[i]&=  (~ (1<<j));
         if (ClientsMask[i]==0)
