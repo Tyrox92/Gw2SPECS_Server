@@ -47,6 +47,8 @@ Temporary Items
 .apdisk
 
 #qt
+gw2specs_server.pro.user
+gw2specs.pro.user.*
 dps_server.pro.user
 dps_server.pro.user.*
 *.pro.user
