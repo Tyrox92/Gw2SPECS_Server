@@ -4,6 +4,7 @@
 #include "mythread.h"
 #include "myserver.h"
 #include <QtNetwork>
+#include <global.h>
 
 
 
@@ -83,58 +84,73 @@ void MyThread::run()
 void MyThread::readyRead()
 {
     // get the information
-
-
     QByteArray Data = socket->readAll();
     int i,j,k;
     i=0;j=0;
+
     while ((i<10) && (ClientsIDs[i]!=socketDescriptor)) i++;
+
     if (i<10)
     {
         j=i;
         ClientsData[i]=Data;
         ClientLastTime[i]=timeOut1.elapsed();
     }
-    else {qDebug() << "Incoming data error : NO MATCHING CLIENT ID";}
+    else {
+        qDebug() << "Incoming data error : NO MATCHING CLIENT ID";
+    }
 
     for(i=0;i<10;i++)
     {
-    if ((ClientsIDs[i]>1) &&  (timeOut1.elapsed()-ClientLastTime[i]>5000))
+        // echo auth for reset request
+        if (ClientsData[i][0]=='r' && ClientsData[i][1]=='e' && ClientsData[i][2]=='s')
         {
-        qDebug() << "Client"<<i<< " connection lost, disconnecting..";
-        ClientsIDs[i]=1; //disconnected not free yet
-        ClientsMask[i]=0;
-        for (k=0;k<10;k++)
+            QString authcode2(ClientsData[i].mid(3,5));
+            if (authcode2.toInt() == authcode)
             {
-             if (ClientsIDs[k]>1) ClientsMask[i]|=(1<<k);
+                socket->write("RES");
+                qDebug() << "Reset Message has been sent.";
+            } else {
+                qDebug() << "Reset Request denied; wrong Authcode.";
             }
-        ClientTimeOut[i]=timeOut1.elapsed();
-        }
-    if (ClientsIDs[i]>1) {socket->write(ClientsData[i]);}
-    if (ClientsIDs[i]==1)
-        {
-        if (timeOut1.elapsed()-ClientTimeOut[i]>3000)
-        {
-            ClientsIDs[i]=0;NumberOfClients--;
-            qDebug() << "Client"<<i<< " timeout reached, fully disconnected";
-            qDebug() << NumberOfClients << " client(s) connected";
-        }
-        else
-         {
-        //sprintf(tmp1, "|%u;;0;0;0;0;0|", i);
-        //socket->write(tmp1);
-        ClientsMask[i]&=  (~ (1<<j));
-        if (ClientsMask[i]==0)
+        } else {
+            if ((ClientsIDs[i]>1) &&  (timeOut1.elapsed()-ClientLastTime[i]>5000))
             {
-            ClientsIDs[i]=0;
-            NumberOfClients--;
-            qDebug() << "Client"<<i<< " disconnection mask reached zero, fully disconnected";
-            qDebug() << NumberOfClients << " client(s) connected";
+            ClientsIDs[i]=1; //disconnected not free yet
+            ClientsMask[i]=0;
+            for (k=0;k<10;k++)
+                {
+                 if (ClientsIDs[k]>1) ClientsMask[i]|=(1<<k);
+                }
+            ClientTimeOut[i]=timeOut1.elapsed();
             }
-        }
+            if (ClientsIDs[i]>1)
+            {
+                socket->write(ClientsData[i]);
+            }
+            if (ClientsIDs[i]==1)
+            {
+                if (timeOut1.elapsed()-ClientTimeOut[i]>3000)
+                {
+                    ClientsIDs[i]=0;
+                    NumberOfClients--;
+                    qDebug() << "Client"<<i<< " timeout reached, fully disconnected";
+                    qDebug() << NumberOfClients << " client(s) connected";
+                }
+                else
+                {
+                    ClientsMask[i]&=  (~ (1<<j));
+                    if (ClientsMask[i]==0)
+                    {
+                        ClientsIDs[i]=0;
+                        NumberOfClients--;
+                        qDebug() << "Client"<<i<< " disconnection mask reached zero, fully disconnected";
+                        qDebug() << NumberOfClients << " client(s) connected";
+                    }
+                }
+            }
         }
     }
-
 }
 
 void MyThread::disconnected()
