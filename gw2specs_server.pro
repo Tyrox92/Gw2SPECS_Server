@@ -19,6 +19,7 @@ SOURCES += main.cpp \
 
 HEADERS += \
     mythread.h \
-    myserver.h
+    myserver.h \
+    global.h
 
 FORMS +=

@@ -4,6 +4,7 @@
 #include "myserver.h"
 
 QTime timeOut1;
+int authcode;
 
 int main(int argc, char *argv[])
 {

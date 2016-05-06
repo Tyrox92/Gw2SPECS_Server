@@ -3,8 +3,7 @@
 #include "myserver.h"
 #include "mythread.h"
 #include <iostream>
-
-
+#include <global.h>
 
 
 MyServer::MyServer(QObject *parent) :
@@ -16,7 +15,8 @@ void MyServer::startServer()
 {
     int port = 0;
     timeOut1.start();
-    std::cout << "Gw2SPECS Server V1.1 Made by Tyrox and Kozzy\n";
+    std::cout << "Gw2SPECS Server V1.1 Made by Tyrox and Kozzy\r\n";
+    std::cout << "Reset code: " << authcode << "\r\n";
     std::cout << "Port : (default=1234) ";
     std::cin >> port;
     if (port==0) port=1234;
