@@ -13,12 +13,20 @@ MyServer::MyServer(QObject *parent) :
 
 void MyServer::startServer()
 {
+    QTime now = QTime::currentTime();
+    qsrand(now.msec());
+
     int port = 0;
+    authcode = qrand() % 89999 + 10001;
     timeOut1.start();
     std::cout << "Gw2SPECS Server V1.1 Made by Tyrox and Kozzy\r\n";
     std::cout << "Reset code: " << authcode << "\r\n";
     std::cout << "Port : (default=1234) ";
-    std::cin >> port;
+    if (std::cin.peek() == '\n') {
+        port = 1234;
+    } else if (!(std::cin >> port)) {
+        std::cout << "Invalid input.\n";
+    }
     if (port==0) port=1234;
 
     if(!this->listen(QHostAddress::Any,port))
