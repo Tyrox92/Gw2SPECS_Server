@@ -86,6 +86,8 @@ void MyThread::readyRead()
     // get the information
     QByteArray Data = socket->readAll();
     int i,j,k;
+    int resetCase = 0;
+    int clientWhoReset = 0;
     i=0;j=0;
 
     while ((i<10) && (ClientsIDs[i]!=socketDescriptor)) i++;
@@ -103,17 +105,38 @@ void MyThread::readyRead()
     for(i=0;i<10;i++)
     {
         // echo auth for reset request
-        if (ClientsData[i][0]=='r' && ClientsData[i][1]=='e' && ClientsData[i][2]=='s')
+        if (ClientsData[i][1]=='r' && ClientsData[i][2]=='e' && ClientsData[i][3]=='s')
         {
-            QString authcode2(ClientsData[i].mid(3,5));
+            clientWhoReset = i;
+            QString authcode2(ClientsData[i].mid(4,ClientsData[i].indexOf("|",1)-4));
             if (authcode2.toInt() == authcode)
             {
-                socket->write("RES");
-                qDebug() << "Reset Message has been sent.";
+                resetCase = 1;
+
             } else {
-                qDebug() << "Reset Request denied; wrong Authcode.";
+                resetCase = 2;
             }
-        } else {
+        }
+        //qDebug() << "ClientsData["<<i<<"]" << ClientsData[i];
+    }
+
+
+    switch (resetCase)
+    {
+    case 1:
+        // reset accepted
+        socket->write("RES");
+        qDebug() << "Reset Message from Client" << clientWhoReset << "has been sent.";
+        break;
+    case 2:
+        // reset denied
+        qDebug() << "Reset request from Client" << clientWhoReset << "has been denied; wrong AuthCode.";
+        break;
+    case 0:
+    default:
+        // echo player data
+        for(i=0;i<10;i++)
+        {
             if ((ClientsIDs[i]>1) &&  (timeOut1.elapsed()-ClientLastTime[i]>5000))
             {
             ClientsIDs[i]=1; //disconnected not free yet
