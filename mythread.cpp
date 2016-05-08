@@ -87,7 +87,7 @@ void MyThread::readyRead()
     QByteArray Data = socket->readAll();
     int i,j,k;
     int resetCase = 0;
-    int clientWhoReset = 0;
+    int clientWhoTries = 0;
     i=0;j=0;
 
     while ((i<10) && (ClientsIDs[i]!=socketDescriptor)) i++;
@@ -107,7 +107,7 @@ void MyThread::readyRead()
         // echo auth for reset request
         if (ClientsData[i][1]=='r' && ClientsData[i][2]=='e' && ClientsData[i][3]=='s')
         {
-            clientWhoReset = i;
+            clientWhoTries = i;
             QString authcode2(ClientsData[i].mid(4,ClientsData[i].indexOf("|",1)-4));
             if (authcode2.toInt() == authcode)
             {
@@ -116,10 +116,10 @@ void MyThread::readyRead()
             } else {
                 resetCase = 2;
             }
-        }else if(ClientsData[i][1]=='a' && ClientsData[i][2]=='d' && ClientsData[i][3]=='m' && ClientsData[i][4]=='i' && ClientsData[i][5]=='n'){
-            qDebug()<< i << " is trying to authenticate as Admin...";
+        } else if (ClientsData[i][1]=='a' && ClientsData[i][2]=='d' && ClientsData[i][3]=='m' && ClientsData[i][4]=='i' && ClientsData[i][5]=='n'){
+            qDebug()<< "Client" << i << "is trying to authenticate as Admin...";
 
-            clientWhoReset = i;
+            clientWhoTries = i;
             QString authcode3(ClientsData[i].mid(6,ClientsData[i].indexOf("|",1)-6));
             if (authcode3.toInt() == authcode)
             {
@@ -132,17 +132,16 @@ void MyThread::readyRead()
         //qDebug() << "ClientsData["<<i<<"]" << ClientsData[i];
     }
 
-
     switch (resetCase)
     {
     case 1:
         // reset accepted
         socket->write("RES");
-        qDebug() << "Reset Message from Client" << clientWhoReset << "has been sent.";
+        qDebug() << "Reset Message from Client" << clientWhoTries << "has been sent.";
         break;
     case 2:
         // reset denied
-        qDebug() << "Reset request from Client" << clientWhoReset << "has been denied; wrong AuthCode.";
+        qDebug() << "Reset request from Client" << clientWhoTries << "has been denied; wrong AuthCode.";
         break;
     case 3:
         // Authentication successfull
@@ -151,10 +150,11 @@ void MyThread::readyRead()
         break;
     case 4:
         // Authentication denied
-        qDebug() << "Client" << clientWhoReset << " has not been accepted - Reason: Wrong AuthCode.";
+        qDebug() << "Client" << clientWhoTries << " has not been accepted - Reason: Wrong AuthCode.";
         break;
-    case 0:
     default:
+        qDebug() << "Default Case has been invoked. Why?";
+    case 0:
         // echo player data
         for(i=0;i<10;i++)
         {
