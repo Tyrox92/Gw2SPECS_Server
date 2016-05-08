@@ -116,6 +116,18 @@ void MyThread::readyRead()
             } else {
                 resetCase = 2;
             }
+        }else if(ClientsData[i][1]=='a' && ClientsData[i][2]=='d' && ClientsData[i][3]=='m' && ClientsData[i][4]=='i' && ClientsData[i][5]=='n'){
+            qDebug()<< i << " is trying to authenticate as Admin...";
+
+            clientWhoReset = i;
+            QString authcode3(ClientsData[i].mid(6,ClientsData[i].indexOf("|",1)-6));
+            if (authcode3.toInt() == authcode)
+            {
+                resetCase = 3;
+
+            } else {
+                resetCase = 4;
+            }
         }
         //qDebug() << "ClientsData["<<i<<"]" << ClientsData[i];
     }
@@ -131,6 +143,15 @@ void MyThread::readyRead()
     case 2:
         // reset denied
         qDebug() << "Reset request from Client" << clientWhoReset << "has been denied; wrong AuthCode.";
+        break;
+    case 3:
+        // Authentication successfull
+        socket->write("OKE");
+        qDebug() << "Client " << clientWhoReset << "has been accepted as Admin.";
+        break;
+    case 4:
+        // Authentication denied
+        qDebug() << "Client" << clientWhoReset << " has not been accepted - Reason: Wrong AuthCode.";
         break;
     case 0:
     default:
