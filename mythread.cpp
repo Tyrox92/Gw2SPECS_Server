@@ -146,7 +146,7 @@ void MyThread::readyRead()
     case 3:
         // Authentication successfull
         socket->write("OKE");
-        qDebug() << "Client " << clientWhoReset << "has been accepted as Admin.";
+        qDebug() << "Client " << clientWhoTries << "has been accepted as Admin.";
         break;
     case 4:
         // Authentication denied
