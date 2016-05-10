@@ -19,9 +19,10 @@ void MyServer::startServer()
     int port = 0;
     authcode = qrand() % 89999 + 10001;
     timeOut1.start();
-    std::cout << "Gw2SPECS Server V1.1 Made by Tyrox and Kozzy\r\n";
-    std::cout << "Reset code: " << authcode << "\r\n";
-    std::cout << "Port : (default=1234) ";
+    std::cout << "Gw2SPECS Server V1.1 Made by Tyrox and Kozzy\r\n\r\n";
+    std::cout << "To use the global reset, do as follows:\r\n1. Right click anywhere in the client while being connected to the server\r\n2. Press \"Authenticate\"\r\n3. Enter the AuthCode and confirm\r\n\r\n";
+    std::cout << "AuthCode: " << authcode << "\r\n";
+    std::cout << "Port (default=1234): ";
     if (std::cin.peek() == '\n') {
         port = 1234;
     } else if (!(std::cin >> port)) {
