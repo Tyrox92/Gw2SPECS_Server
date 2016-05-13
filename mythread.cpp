@@ -91,7 +91,7 @@ void MyThread::readyRead()
     i=0;j=0;
 
     if(connectTries == 0){
-        if(Data == "2.5"){
+        if(Data == "1.0"){
             qDebug()<< "Client is on current Version. Access permitted...";
             connectTries = 1;
         }else{
@@ -154,7 +154,7 @@ void MyThread::readyRead()
             break;
         case 3:
             // Authentication successfull
-            socket->write("OKE");
+            socket->write("ACK");
             qDebug() << "Client " << clientWhoTries << "has been accepted as Admin.";
             break;
         case 4:
