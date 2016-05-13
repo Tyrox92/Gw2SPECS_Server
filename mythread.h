@@ -31,6 +31,7 @@ private:
     QTcpSocket *socket;
     qintptr socketDescriptor;
     char tmp1[64];
+    int connectTries = 0;
 };
 
 #endif // MYTHREAD_H
