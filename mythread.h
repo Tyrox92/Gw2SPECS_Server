@@ -19,6 +19,10 @@ public:
     explicit MyThread(qintptr ID, QObject *parent = 0);
 
     void run();
+    QString authSuccess;
+    char writeAuth[128];
+    QByteArray tempAuth1;
+    const char* tempAuth2;
 
 signals:
     void error(QTcpSocket::SocketError socketerror);

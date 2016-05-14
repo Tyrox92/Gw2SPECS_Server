@@ -154,7 +154,11 @@ void MyThread::readyRead()
             break;
         case 3:
             // Authentication successfull
-            socket->write("ACK");
+            authSuccess = "ACK" + QString::number(authcode);
+            tempAuth1 = authSuccess.toUtf8();
+            tempAuth2 = tempAuth1.data();
+            sprintf(writeAuth, "%s", tempAuth2);
+            socket->write(writeAuth);
             qDebug() << "Client " << clientWhoTries << "has been accepted as Admin.";
             break;
         case 4:
