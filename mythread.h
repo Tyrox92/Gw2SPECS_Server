@@ -21,6 +21,7 @@ public:
     void run();
     QString authSuccess;
     char writeAuth[128];
+    char writeAdmin[128];
     QByteArray tempAuth1;
     const char* tempAuth2;
 

@@ -88,6 +88,7 @@ void MyThread::readyRead()
     int i,j,k;
     int resetCase = 0;
     int clientWhoTries = 0;
+    int globalreset = 0;
     i=0;j=0;
 
     if(connectTries == 0){
@@ -120,7 +121,7 @@ void MyThread::readyRead()
                 QString authcode2(ClientsData[i].mid(4,ClientsData[i].indexOf("|",1)-4));
                 if (authcode2.toInt() == authcode)
                 {
-                    resetCase = 1;
+                    globalreset = 1;
 
                 } else {
                     resetCase = 2;
@@ -143,11 +144,6 @@ void MyThread::readyRead()
 
         switch (resetCase)
         {
-        case 1:
-            // reset accepted
-            socket->write("RES");
-            qDebug() << "Reset Message from Client" << clientWhoTries << "has been sent.";
-            break;
         case 2:
             // reset denied
             qDebug() << "Reset request from Client" << clientWhoTries << "has been denied; wrong AuthCode.";
@@ -169,6 +165,10 @@ void MyThread::readyRead()
             qDebug() << "Default Case has been invoked. Why?";
         case 0:
             // echo player data
+            sprintf(writeAdmin,"|%u|",globalreset);
+            socket->write(writeAdmin);
+            if (globalreset==1) qDebug() << "Reset Message from Client" << clientWhoTries << "has been sent";
+
             for(i=0;i<10;i++)
             {
                 if ((ClientsIDs[i]>1) &&  (timeOut1.elapsed()-ClientLastTime[i]>5000))
