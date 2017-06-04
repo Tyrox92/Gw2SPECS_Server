@@ -9,6 +9,7 @@ QTime timeOut1;
 int authcode;
 int portvalue;
 int authvalue;
+QString bindvalue;
 
 int main(int argc, char *argv[])
 {
@@ -29,6 +30,12 @@ int main(int argc, char *argv[])
             "0");
     parser.addOption(authParam);
 
+    QCommandLineOption bindParam(QStringList() << "b" << "bind",
+            "Address to bind to",
+            "bindaddress",
+            "0");
+    parser.addOption(bindParam);
+
     // Process the actual command line arguments given by the user
     parser.process(a);
 
@@ -36,6 +43,8 @@ int main(int argc, char *argv[])
     portvalue = portstring.toInt();
     QString authstring = parser.value(authParam);
     authvalue = authstring.toInt();
+    QString bindstring = parser.value(bindParam);
+    bindvalue = bindstring;
 
     // Make a server and starts it
     MyServer server;
