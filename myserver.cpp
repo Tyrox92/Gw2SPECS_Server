@@ -40,8 +40,13 @@ void MyServer::startServer()
     } else {
         port = portvalue;
     }
+    QHostAddress bindto = QHostAddress::Any;
+    if (bindvalue != "0")
+    {
+	bindto = QHostAddress(bindvalue);
+    }
 
-    if(!this->listen(QHostAddress::Any,port))
+    if(!this->listen(bindto, port))
     {
         qDebug() << "Could not start server";
     }

@@ -6,3 +6,4 @@
 extern int authcode;
 extern int portvalue;
 extern int authvalue;
+extern QString bindvalue;
