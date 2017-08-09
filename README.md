@@ -7,3 +7,11 @@ Gw2SPECS Server V1.1 made by Tyrox and Kozzy is the server component for the [Gw
 - Do not close the window while you want to use the server
 
 Just start the Server and wait for the connections. ;)
+
+## Docker Setup
+- install [Docker](https://docs.docker.com/engine/installation/).
+- Go to docker repository
+- Build the docker image: ```docker build -t gw2spec-server``` .
+- Run the server: ```docker run -d -p 1234:1234 gw2spec-server``` 
+
+the server will be launch on the port 1234 by default if you want to change this port you can add the -e PORT=new-port-there and change the port number.
